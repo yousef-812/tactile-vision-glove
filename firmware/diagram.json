@@ -3,7 +3,7 @@
   "author": "Eng Yousef & Fares Saif",
   "editor": "wokwi",
   "parts": [
-    { "type": "board-esp32-s3-devkitc-1", "id": "esp", "top": 100, "left": 0, "attrs": {} },
+    { "type": "wokwi-esp32-devkit-v4", "id": "esp", "top": 100, "left": 0, "attrs": {} },
     { "type": "wokwi-led", "id": "motor_thumb", "top": -80, "left": -120, "attrs": { "color": "red", "label": "Thumb" } },
     { "type": "wokwi-led", "id": "motor_index", "top": -80, "left": -30, "attrs": { "color": "yellow", "label": "Index" } },
     { "type": "wokwi-led", "id": "motor_middle", "top": -80, "left": 60, "attrs": { "color": "magenta", "label": "Middle" } },
@@ -18,8 +18,8 @@
     [ "motor_palm:C", "esp:GND.1", "black", [] ],
     [ "motor_thumb:A", "esp:4", "red", [] ],
     [ "motor_index:A", "esp:5", "yellow", [] ],
-    [ "motor_middle:A", "esp:6", "magenta", [] ],
-    [ "motor_ring:A", "esp:7", "cyan", [] ],
-    [ "motor_palm:A", "esp:15", "red", [] ]
+    [ "motor_middle:A", "esp:18", "magenta", [] ],
+    [ "motor_ring:A", "esp:19", "cyan", [] ],
+    [ "motor_palm:A", "esp:21", "red", [] ]
   ]
 }

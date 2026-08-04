@@ -3,13 +3,15 @@
   "author": "Eng Yousef & Fares Saif",
   "editor": "wokwi",
   "parts": [
-    { "type": "board-esp32-s3-devkitc-1", "id": "esp", "top": 100, "left": 0, "attrs": {} },
-    { "type": "wokwi-led", "id": "motor_thumb", "top": -80, "left": -120, "attrs": { "color": "red", "label": "Thumb" } },
-    { "type": "wokwi-led", "id": "motor_index", "top": -80, "left": -30, "attrs": { "color": "yellow", "label": "Index" } },
-    { "type": "wokwi-led", "id": "motor_middle", "top": -80, "left": 60, "attrs": { "color": "magenta", "label": "Middle" } },
-    { "type": "wokwi-led", "id": "motor_ring", "top": -80, "left": 150, "attrs": { "color": "cyan", "label": "Ring" } },
-    { "type": "wokwi-led", "id": "motor_palm", "top": -80, "left": 240, "attrs": { "color": "red", "label": "Palm" } },
-    { "type": "wokwi-hc-sr04", "id": "sonar", "top": 260, "left": 60, "attrs": { "label": "Distance Sensor" } }
+    { "type": "board-esp32-s3-devkitc-1", "id": "esp", "top": 120, "left": 0, "attrs": {} },
+    { "type": "wokwi-led", "id": "motor_thumb", "top": -60, "left": -120, "attrs": { "color": "red", "label": "Thumb (Left)" } },
+    { "type": "wokwi-led", "id": "motor_index", "top": -60, "left": -30, "attrs": { "color": "yellow", "label": "Index (Right)" } },
+    { "type": "wokwi-led", "id": "motor_middle", "top": -60, "left": 60, "attrs": { "color": "magenta", "label": "Middle (Overhead)" } },
+    { "type": "wokwi-led", "id": "motor_ring", "top": -60, "left": 150, "attrs": { "color": "cyan", "label": "Ring (Ground)" } },
+    { "type": "wokwi-led", "id": "motor_palm", "top": -60, "left": 240, "attrs": { "color": "red", "label": "Palm (Collision)" } },
+    { "type": "wokwi-hc-sr04", "id": "sonar_left", "top": 280, "left": -150, "attrs": { "label": "Left Sensor" } },
+    { "type": "wokwi-hc-sr04", "id": "sonar_center", "top": 280, "left": 30, "attrs": { "label": "Center Sensor" } },
+    { "type": "wokwi-hc-sr04", "id": "sonar_right", "top": 280, "left": 210, "attrs": { "label": "Right Sensor" } }
   ],
   "connections": [
     [ "motor_thumb:C", "esp:GND.1", "black", [] ],
@@ -22,9 +24,17 @@
     [ "motor_middle:A", "esp:6", "magenta", [] ],
     [ "motor_ring:A", "esp:7", "cyan", [] ],
     [ "motor_palm:A", "esp:15", "red", [] ],
-    [ "sonar:TRIG", "esp:12", "green", [] ],
-    [ "sonar:ECHO", "esp:13", "orange", [] ],
-    [ "sonar:GND", "esp:GND.2", "black", [] ],
-    [ "sonar:VCC", "esp:5V", "red", [] ]
+    [ "sonar_left:TRIG", "esp:12", "green", [] ],
+    [ "sonar_left:ECHO", "esp:13", "orange", [] ],
+    [ "sonar_left:GND", "esp:GND.2", "black", [] ],
+    [ "sonar_left:VCC", "esp:5V", "red", [] ],
+    [ "sonar_center:TRIG", "esp:14", "green", [] ],
+    [ "sonar_center:ECHO", "esp:27", "orange", [] ],
+    [ "sonar_center:GND", "esp:GND.2", "black", [] ],
+    [ "sonar_center:VCC", "esp:5V", "red", [] ],
+    [ "sonar_right:TRIG", "esp:26", "green", [] ],
+    [ "sonar_right:ECHO", "esp:25", "orange", [] ],
+    [ "sonar_right:GND", "esp:GND.2", "black", [] ],
+    [ "sonar_right:VCC", "esp:5V", "red", [] ]
   ]
 }

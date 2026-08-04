@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "author": "Eng Yousef & Fares Saif",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-s3-devkitc-1", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-led", "id": "motor_thumb", "top": -140, "left": -140, "attrs": { "color": "red", "label": "Thumb (Left)" } },
+    { "type": "wokwi-led", "id": "motor_index", "top": -140, "left": -40, "attrs": { "color": "yellow", "label": "Index (Right)" } },
+    { "type": "wokwi-led", "id": "motor_middle", "top": -140, "left": 60, "attrs": { "color": "magenta", "label": "Middle (Overhead)" } },
+    { "type": "wokwi-led", "id": "motor_ring", "top": -140, "left": 160, "attrs": { "color": "cyan", "label": "Ring (Ground)" } },
+    { "type": "wokwi-led", "id": "motor_palm", "top": -140, "left": 260, "attrs": { "color": "red", "label": "Palm (Collision)" } },
+    { "type": "wokwi-mpu6050", "id": "mpu", "top": 160, "left": -80, "attrs": {} },
+    { "type": "wokwi-hc-sr04", "id": "sonar", "top": 160, "left": 120, "attrs": { "label": "ToF Distance Simulator" } }
+  ],
+  "connections": [
+    [ "esp:GND.1", "motor_thumb:C", "black", [ "v0" ] ],
+    [ "esp:GND.1", "motor_index:C", "black", [ "v0" ] ],
+    [ "esp:GND.1", "motor_middle:C", "black", [ "v0" ] ],
+    [ "esp:GND.1", "motor_ring:C", "black", [ "v0" ] ],
+    [ "esp:GND.1", "motor_palm:C", "black", [ "v0" ] ],
+    [ "esp:4", "motor_thumb:A", "red", [ "v0" ] ],
+    [ "esp:5", "motor_index:A", "yellow", [ "v0" ] ],
+    [ "esp:6", "motor_middle:A", "magenta", [ "v0" ] ],
+    [ "esp:7", "motor_ring:A", "cyan", [ "v0" ] ],
+    [ "esp:15", "motor_palm:A", "red", [ "v0" ] ],
+    [ "esp:GND.2", "mpu:GND", "black", [ "v0" ] ],
+    [ "esp:3V3.1", "mpu:VCC", "red", [ "v0" ] ],
+    [ "esp:21", "mpu:SDA", "blue", [ "v0" ] ],
+    [ "esp:22", "mpu:SCL", "yellow", [ "v0" ] ]
+  ]
+}

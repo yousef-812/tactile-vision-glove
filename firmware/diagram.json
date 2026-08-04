@@ -8,7 +8,8 @@
     { "type": "wokwi-led", "id": "motor_index", "top": -80, "left": -30, "attrs": { "color": "yellow", "label": "Index" } },
     { "type": "wokwi-led", "id": "motor_middle", "top": -80, "left": 60, "attrs": { "color": "magenta", "label": "Middle" } },
     { "type": "wokwi-led", "id": "motor_ring", "top": -80, "left": 150, "attrs": { "color": "cyan", "label": "Ring" } },
-    { "type": "wokwi-led", "id": "motor_palm", "top": -80, "left": 240, "attrs": { "color": "red", "label": "Palm" } }
+    { "type": "wokwi-led", "id": "motor_palm", "top": -80, "left": 240, "attrs": { "color": "red", "label": "Palm" } },
+    { "type": "wokwi-hc-sr04", "id": "sonar", "top": 260, "left": 60, "attrs": { "label": "Distance Sensor" } }
   ],
   "connections": [
     [ "motor_thumb:C", "esp:GND.1", "black", [] ],
@@ -20,6 +21,10 @@
     [ "motor_index:A", "esp:5", "yellow", [] ],
     [ "motor_middle:A", "esp:6", "magenta", [] ],
     [ "motor_ring:A", "esp:7", "cyan", [] ],
-    [ "motor_palm:A", "esp:15", "red", [] ]
+    [ "motor_palm:A", "esp:15", "red", [] ],
+    [ "sonar:TRIG", "esp:12", "green", [] ],
+    [ "sonar:ECHO", "esp:13", "orange", [] ],
+    [ "sonar:GND", "esp:GND.2", "black", [] ],
+    [ "sonar:VCC", "esp:5V", "red", [] ]
   ]
 }

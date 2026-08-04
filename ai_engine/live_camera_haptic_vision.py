@@ -2,10 +2,22 @@ import sys
 import cv2
 import numpy as np
 import time
+import logging
 
 # Configure UTF-8 encoding for console output
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
+
+# Setup logging to both console and file
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s | %(message)s',
+    handlers=[
+        logging.FileHandler('H:/project/tactile_vision_glove/ai_engine/haptic_debug.log', encoding='utf-8'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+log = logging.getLogger('TactileVision')
 
 class TactileVisionCameraSystem:
     """
@@ -15,13 +27,23 @@ class TactileVisionCameraSystem:
     """
 
     def __init__(self, camera_index=0):
-        self.cap = cv2.VideoCapture(camera_index)
+        # Try DirectShow backend first (more reliable on Windows)
+        self.cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
+        if not self.cap.isOpened():
+            print("[!] DirectShow failed, trying default backend...")
+            self.cap = cv2.VideoCapture(camera_index)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+        # MOG2 Background Subtractor - learns background, detects only foreground
+        self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(
+            history=60, varThreshold=40, detectShadows=False
+        )
 
         # Previous center density for velocity detection
         self.prev_center_density = 0.0
         self.prev_time = time.time()
+        self.frame_count = 0  # Track warmup frames
 
         # Motor states
         self.motors = {
@@ -32,15 +54,18 @@ class TactileVisionCameraSystem:
             "PALM_CENTER":      {"label": "Palm (Collision!)", "color": (0, 0, 255),     "state": 0},
         }
 
-    def compute_zone_threat(self, zone_gray):
+    def compute_zone_threat(self, fg_mask_zone):
         """
         Computes threat level (0.0 - 1.0) for a zone.
-        Uses edge density: more edges = more objects = closer threat.
+        Uses foreground mask from MOG2 background subtraction.
+        Only detects objects that appear/move vs the learned background.
         """
-        blurred = cv2.GaussianBlur(zone_gray, (9, 9), 0)
-        edges = cv2.Canny(blurred, 30, 100)
-        density = np.sum(edges > 0) / float(edges.size)
-        return float(np.clip(density * 6.0, 0.0, 1.0))
+        if fg_mask_zone.size == 0:
+            return 0.0
+        # Ratio of foreground pixels in zone
+        fg_ratio = np.sum(fg_mask_zone > 0) / float(fg_mask_zone.size)
+        return float(np.clip(fg_ratio * 5.0, 0.0, 1.0))
+
 
     def compute_velocity(self, current_density):
         """
@@ -57,16 +82,22 @@ class TactileVisionCameraSystem:
 
     def analyze_frame(self, frame):
         h, w = frame.shape[:2]
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        self.frame_count += 1
 
-        # Divide frame into 3 horizontal zones (Left / Center / Right)
-        left_zone   = gray[:, :int(w * 0.33)]
-        center_zone = gray[:, int(w * 0.33):int(w * 0.67)]
-        right_zone  = gray[:, int(w * 0.67):]
+        # Apply MOG2 background subtraction to get foreground mask
+        fg_mask = self.bg_subtractor.apply(frame)
 
-        # Also divide center vertically into top (overhead) and bottom (ground)
-        top_zone    = gray[:int(h * 0.40), int(w * 0.33):int(w * 0.67)]
-        bottom_zone = gray[int(h * 0.60):, int(w * 0.33):int(w * 0.67)]
+        # Divide foreground mask into 5 spatial zones
+        left_zone   = fg_mask[:, :int(w * 0.33)]
+        center_zone = fg_mask[:, int(w * 0.33):int(w * 0.67)]
+        right_zone  = fg_mask[:, int(w * 0.67):]
+        top_zone    = fg_mask[:int(h * 0.40), int(w * 0.33):int(w * 0.67)]
+        bottom_zone = fg_mask[int(h * 0.60):, int(w * 0.33):int(w * 0.67)]
+
+        # During warmup (first 60 frames), skip detection so background is learned
+        if self.frame_count < 60:
+            return {"left": 0, "center": 0, "right": 0,
+                    "top": 0, "bottom": 0, "velocity": 0, "warming_up": True}
 
         # Compute threat levels per zone (0.0 = safe, 1.0 = danger)
         threat_left    = self.compute_zone_threat(left_zone)
@@ -76,12 +107,13 @@ class TactileVisionCameraSystem:
         threat_bottom  = self.compute_zone_threat(bottom_zone)
         velocity       = self.compute_velocity(threat_center)
 
+
         # Reset motors
         for m in self.motors.values():
             m["state"] = 0
 
         # -------- Haptic Decision Engine --------
-        THRESHOLD = 0.30  # Minimum threat to trigger motor
+        THRESHOLD = 0.08  # Minimum threat to trigger motor (very sensitive)
 
         # 1. FAST APPROACH DETECTION (velocity > 0.8 = object coming fast)
         if velocity > 0.8 and threat_center > THRESHOLD:

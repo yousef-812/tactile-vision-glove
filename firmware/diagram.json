@@ -28,12 +28,12 @@
     [ "sonar_left:ECHO", "esp:13", "orange", [] ],
     [ "sonar_left:GND", "esp:GND.2", "black", [] ],
     [ "sonar_left:VCC", "esp:5V", "red", [] ],
-    [ "sonar_center:TRIG", "esp:14", "green", [] ],
-    [ "sonar_center:ECHO", "esp:27", "orange", [] ],
+    [ "sonar_center:TRIG", "esp:35", "green", [] ],
+    [ "sonar_center:ECHO", "esp:36", "orange", [] ],
     [ "sonar_center:GND", "esp:GND.2", "black", [] ],
     [ "sonar_center:VCC", "esp:5V", "red", [] ],
-    [ "sonar_right:TRIG", "esp:26", "green", [] ],
-    [ "sonar_right:ECHO", "esp:25", "orange", [] ],
+    [ "sonar_right:TRIG", "esp:37", "green", [] ],
+    [ "sonar_right:ECHO", "esp:38", "orange", [] ],
     [ "sonar_right:GND", "esp:GND.2", "black", [] ],
     [ "sonar_right:VCC", "esp:5V", "red", [] ]
   ]

@@ -12,11 +12,11 @@
 #define TRIG_LEFT   12
 #define ECHO_LEFT   13
 
-#define TRIG_CENTER 14
-#define ECHO_CENTER 27
+#define TRIG_CENTER 35
+#define ECHO_CENTER 36
 
-#define TRIG_RIGHT  26
-#define ECHO_RIGHT  25
+#define TRIG_RIGHT  37
+#define ECHO_RIGHT  38
 
 // Velocity calculation variables
 float prevCenterDist = 400.0;

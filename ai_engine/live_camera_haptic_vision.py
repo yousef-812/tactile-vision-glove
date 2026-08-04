@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import time
 import logging
+import serial
 
 # Configure UTF-8 encoding for console output
 if hasattr(sys.stdout, 'reconfigure'):
@@ -23,10 +24,10 @@ class TactileVisionCameraSystem:
     """
     TactileVision - Real-time Single Camera 3-Zone Spatial AI System
     Simulates Left / Center / Right obstacle detection using webcam.
-    Maps detected obstacles to 5 haptic finger motors.
+    Maps detected obstacles to 5 haptic finger motors and streams data over Serial.
     """
 
-    def __init__(self, camera_index=0):
+    def __init__(self, camera_index=0, serial_port='COM3'):
         # Try DirectShow backend first (more reliable on Windows)
         self.cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
         if not self.cap.isOpened():
@@ -34,6 +35,16 @@ class TactileVisionCameraSystem:
             self.cap = cv2.VideoCapture(camera_index)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+        # Initialize Serial connection for Wokwi / Hardware bridge
+        self.ser = None
+        if serial_port:
+            try:
+                self.ser = serial.Serial(serial_port, 115200, timeout=1)
+                log.info(f"✅ Serial bridge established on {serial_port}")
+            except Exception as e:
+                log.warning(f"⚠️ Could not open serial port {serial_port}: {e}")
+                log.warning("   Running in Visual Simulator HUD mode only.")
 
         # MOG2 Background Subtractor - learns background, detects only foreground
         self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(
@@ -140,6 +151,21 @@ class TactileVisionCameraSystem:
             if threat_center > 0.65:
                 self.motors["PALM_CENTER"]["state"] = 1
 
+        # Stream via serial port if connected
+        t_val = 255 if self.motors["THUMB_LEFT"]["state"] > 0 else 0
+        i_val = 255 if self.motors["INDEX_RIGHT"]["state"] > 0 else 0
+        m_val = 255 if self.motors["MIDDLE_OVERHEAD"]["state"] > 0 else 0
+        r_val = 255 if self.motors["RING_GROUND"]["state"] > 0 else 0
+        p_val = 255 if self.motors["PALM_CENTER"]["state"] > 0 else 0
+
+        if self.ser and self.ser.is_open:
+            try:
+                packet = f"PWM:{t_val},{i_val},{m_val},{r_val},{p_val}\n"
+                self.ser.write(packet.encode('ascii'))
+                self.ser.flush()
+            except Exception as ex:
+                log.error(f"Error writing to serial: {ex}")
+
         return {
             "left": threat_left,
             "center": threat_center,
@@ -148,6 +174,7 @@ class TactileVisionCameraSystem:
             "bottom": threat_bottom,
             "velocity": velocity
         }
+
 
     def draw_hud(self, frame, threats):
         h, w = frame.shape[:2]

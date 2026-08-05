@@ -63,6 +63,29 @@ float measureDistanceCM(int trigPin, int echoPin) {
 }
 
 void loop() {
+    // Check if Serial Command is available (from Python AI webcam simulator)
+    if (Serial.available() > 0) {
+        String data = Serial.readStringUntil('\n');
+        data.trim();
+        if (data.startsWith("PWM:")) {
+            int t = 0, i = 0, m = 0, r = 0, p = 0;
+            if (sscanf(data.c_str(), "PWM:%d,%d,%d,%d,%d", &t, &i, &m, &r, &p) == 5) {
+                Serial.printf("📥 [AI Vision Control] PWM -> Thumb:%d | Index:%d | Middle:%d | Ring:%d | Palm:%d\n", t, i, m, r, p);
+                
+                // Write digital states to the simulated LED pins
+                digitalWrite(MOTOR_THUMB_LEFT, t > 0 ? HIGH : LOW);
+                digitalWrite(MOTOR_INDEX_RIGHT, i > 0 ? HIGH : LOW);
+                digitalWrite(MOTOR_MIDDLE_OVERHEAD, m > 0 ? HIGH : LOW);
+                digitalWrite(MOTOR_RING_GROUND, r > 0 ? HIGH : LOW);
+                digitalWrite(MOTOR_PALM_CENTER, p > 0 ? HIGH : LOW);
+                
+                delay(10); // Tiny debounce/refresh delay
+                return;    // Bypasses sonar sensing when under live AI webcam control
+            }
+        }
+    }
+
+    // Fallback: 3D Sonar Sensing Logic (when no active serial packet is received)
     unsigned long currentTime = millis();
     float dt = (currentTime - prevTime) / 1000.0; // Time delta in seconds
     if (dt < 0.05) dt = 0.05;

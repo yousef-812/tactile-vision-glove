@@ -40,11 +40,17 @@ class TactileVisionCameraSystem:
         self.ser = None
         if serial_port:
             try:
-                self.ser = serial.Serial(serial_port, 115200, timeout=1)
-                log.info(f"✅ Serial bridge established on {serial_port}")
-            except Exception as e:
-                log.warning(f"⚠️ Could not open serial port {serial_port}: {e}")
-                log.warning("   Running in Visual Simulator HUD mode only.")
+                # Attempt to connect to Wokwi VS Code RFC2217 serial redirector
+                self.ser = serial.serial_for_url("rfc2217://localhost:4000", baudrate=115200, timeout=1)
+                log.info("✅ Connected to Wokwi VS Code Simulator (RFC2217 on port 4000)")
+            except Exception as rfc_err:
+                log.info(f"[-] RFC2217 bridge not found on port 4000. Trying local port {serial_port}...")
+                try:
+                    self.ser = serial.Serial(serial_port, 115200, timeout=1)
+                    log.info(f"✅ Connected to local serial port {serial_port}")
+                except Exception as e:
+                    log.warning(f"⚠️ Could not open serial port {serial_port}: {e}")
+                    log.warning("   Running in Visual Simulator HUD mode only.")
 
         # MOG2 Background Subtractor - learns background, detects only foreground
         self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(
